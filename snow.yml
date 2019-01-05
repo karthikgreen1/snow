@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  tasks:
+     - shell: cat file.csv | awk 'NR>1 {print$1}'
+       register: confdb
+     - shell: cat file.csv | awk 'NR>1 {print$2}'
+       register: date
+     - name: "Creating Change"
+       snow_record:
+          username: admin
+          password: Praveen@2
+          instance: dev71301
+          state: present
+          table: change_request
+          data:
+             short_description: "Configuration item {{item.0}} change has ben created succesfully via ansible"
+             cmdb_ci: "{{item.0}}"
+             start_date: "{{item.1}}"
+       with_together:  
+          - "{{confdb.stdout.split('\n')}}"
+          - "{{date.stdout.split('\n')}}"
+
